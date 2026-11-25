@@ -1,0 +1,435 @@
+
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+#title-bar {
+  text-align: center;
+  padding: 14px 0 10px;
+  background: linear-gradient(180deg, #0a3d6b 0%, #1a7ab8 100%);
+  border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0;
+  border: 0.5px solid #1a6aaa;
+  border-bottom: none;
+}
+#title-bar h1 { font-size: 22px; font-weight: 500; color: #fff; letter-spacing: 2px; }
+#title-bar p { font-size: 11px; color: rgba(255,255,255,0.72); margin-top: 3px; }
+
+#scene {
+  position: relative;
+  width: 100%;
+  height: 400px;
+  overflow: hidden;
+  background: linear-gradient(180deg, #87daf7 0%, #2ba8e0 38%, #1278b0 68%, #0a4f80 100%);
+  border-left: 0.5px solid #1a6aaa;
+  border-right: 0.5px solid #1a6aaa;
+}
+
+.cloud {
+  position: absolute;
+  background: rgba(255,255,255,0.75);
+  border-radius: 20px;
+  animation: cloudmove linear infinite;
+}
+@keyframes cloudmove { 0%{transform:translateX(-120px)} 100%{transform:translateX(820px)} }
+
+.wave-layer {
+  position: absolute; bottom: 0;
+  width: 230%; height: 50px;
+  border-radius: 50% 50% 0 0 / 20px 20px 0 0;
+  animation: waveMove linear infinite;
+}
+.wl1 { background: rgba(255,255,255,0.12); animation-duration: 6s; bottom: 5px; }
+.wl2 { background: rgba(255,255,255,0.07); animation-duration: 9s; animation-direction: reverse; }
+@keyframes waveMove { 0%{transform:translateX(0)} 100%{transform:translateX(-50%)} }
+
+.creature-wrap {
+  position: absolute;
+  display: flex; flex-direction: column; align-items: center;
+  pointer-events: none;
+  will-change: transform, opacity;
+}
+.bubble {
+  background: rgba(255,255,255,0.95);
+  color: #0a3d6b;
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 14px;
+  padding: 6px 12px;
+  white-space: nowrap;
+  border: 0.5px solid rgba(26,120,184,0.3);
+  margin-bottom: 6px;
+  position: relative;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+.bubble::after {
+  content:''; position:absolute;
+  bottom:-7px; left:50%; transform:translateX(-50%);
+  border:7px solid transparent;
+  border-top-color:rgba(255,255,255,0.95);
+  border-bottom:none;
+}
+.creature-img {
+  width: 80px; height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid rgba(255,255,255,0.9);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+}
+.creature-emoji { font-size: 52px; line-height: 1; }
+.name-tag {
+  font-size: 13px; font-weight: 600;
+  color: #fff;
+  background: rgba(10, 61, 107, 0.6);
+  border-radius: 8px; padding: 3px 10px; margin-top: 4px;
+  white-space: nowrap;
+  letter-spacing: 0.5px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+}
+
+#panel {
+  background: var(--color-background-secondary);
+  border-radius: 0 0 var(--border-radius-lg) var(--border-radius-lg);
+  border: 0.5px solid var(--color-border-tertiary);
+  border-top: none;
+  padding: 12px 16px 14px;
+}
+.panel-label { font-size: 13px; font-weight: 500; color: var(--color-text-primary); margin-bottom: 8px; }
+.creature-btns { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 9px; }
+.cbtn {
+  font-size: 11px; padding: 4px 8px;
+  border-radius: var(--border-radius-md);
+  border: 0.5px solid var(--color-border-secondary);
+  background: var(--color-background-primary);
+  color: var(--color-text-primary); cursor: pointer;
+}
+.cbtn:hover { background: var(--color-background-secondary); }
+.cbtn.selected { background: #1278b0; color: #fff; border-color: #1278b0; }
+
+.input-section { display: flex; flex-direction: column; gap: 7px; }
+.upload-row { display: flex; align-items: center; gap: 8px; }
+#upload-btn {
+  font-size: 12px; padding: 6px 12px;
+  border-radius: var(--border-radius-md);
+  border: 0.5px solid var(--color-border-secondary);
+  background: var(--color-background-primary);
+  color: var(--color-text-secondary); cursor: pointer;
+  white-space: nowrap;
+}
+#upload-btn:hover { background: var(--color-background-secondary); }
+#file-input { display: none; }
+#preview-wrap {
+  width: 44px; height: 44px; border-radius: 50%;
+  overflow: hidden; border: 1.5px solid #1278b0;
+  display: none; flex-shrink: 0;
+}
+#preview-wrap img { width: 100%; height: 100%; object-fit: cover; }
+#upload-label { font-size: 11px; color: var(--color-text-secondary); }
+
+.fields-row { display: flex; gap: 6px; align-items: flex-end; flex-wrap: wrap; }
+.field-wrap { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 90px; }
+.field-wrap label { font-size: 10px; color: var(--color-text-secondary); }
+.field-wrap input {
+  font-size: 13px; padding: 7px 10px;
+  border-radius: var(--border-radius-md);
+  border: 0.5px solid var(--color-border-secondary);
+  background: var(--color-background-primary);
+  color: var(--color-text-primary);
+  width: 100%;
+}
+.field-wrap input::placeholder { color: var(--color-text-tertiary); }
+
+#add-btn {
+  padding: 7px 14px; font-size: 13px; font-weight: 500;
+  border-radius: var(--border-radius-md);
+  border: 0.5px solid #1278b0;
+  background: #1278b0; color: #fff; cursor: pointer;
+  white-space: nowrap;
+  height: 36px;
+}
+#add-btn:hover { background: #0f6090; }
+#status { font-size: 11px; color: var(--color-text-secondary); margin-top: 6px; min-height: 16px; }
+#reset-btn {
+  font-size: 11px; color: var(--color-text-tertiary);
+  background: none; border: none; cursor: pointer;
+  text-decoration: underline; padding: 0; margin-top: 4px;
+}
+</style>
+
+<div id="title-bar">
+  <h1>🌊 우리반 깔깔바다 꾸미기 🌊</h1>
+  <p>웃음이 퐁퐁퐁 솟아나면 신나는 일도 퐁퐁퐁 생겨요!</p>
+</div>
+
+<div id="scene">
+  <div class="cloud" style="width:62px;height:18px;top:20px;left:0;animation-duration:32s;animation-delay:0s">
+    <div style="width:28px;height:28px;top:-14px;left:8px;position:absolute;background:rgba(255,255,255,0.75);border-radius:50%"></div>
+    <div style="width:20px;height:20px;top:-10px;left:28px;position:absolute;background:rgba(255,255,255,0.75);border-radius:50%"></div>
+  </div>
+  <div class="cloud" style="width:48px;height:14px;top:46px;left:0;animation-duration:46s;animation-delay:-20s">
+    <div style="width:22px;height:22px;top:-11px;left:5px;position:absolute;background:rgba(255,255,255,0.75);border-radius:50%"></div>
+  </div>
+  <div class="wave-layer wl1"></div>
+  <div class="wave-layer wl2"></div>
+</div>
+
+<div id="panel">
+  <div class="panel-label">생물을 고르고, 이름이랑 웃음소리를 입력해요!</div>
+  <div class="creature-btns" id="creature-btns"></div>
+  <div class="input-section">
+    <div class="upload-row">
+      <button id="upload-btn">🖼️ 그림 사진 올리기</button>
+      <input type="file" id="file-input" accept="image/*" />
+      <div id="preview-wrap"><img id="preview-img" src="" alt="미리보기" /></div>
+      <span id="upload-label">그림 사진을 올려주세요</span>
+    </div>
+    <div class="fields-row">
+      <div class="field-wrap">
+        <label for="name-input">학생 이름</label>
+        <input id="name-input" type="text" placeholder="예: 김민준" maxlength="8" />
+      </div>
+      <div class="field-wrap" style="flex:2">
+        <label for="laugh-input">웃음소리</label>
+        <input id="laugh-input" type="text" placeholder="예: 호호호~ 하하하!" maxlength="18" />
+      </div>
+      <button id="add-btn">바다에 추가!</button>
+    </div>
+  </div>
+  <div id="status"></div>
+  <button id="reset-btn">내가 추가한 생물 지우기</button>
+</div>
+
+<script>
+const defaultCreatures = [
+  { uid:'gm', emoji:'🐦', name:'갈매기',   laugh:'낄룩낄룩!' },
+  { uid:'jo', emoji:'🐚', name:'조개',     laugh:'헤헤헤헤!' },
+  { uid:'ge', emoji:'🦀', name:'달랑게',   laugh:'킬킬킬킬!' },
+  { uid:'bs', emoji:'⭐', name:'불가사리', laugh:'오홍홍홍!' },
+  { uid:'hm', emoji:'🦭', name:'아기해마', laugh:'캬캬캬캬!' },
+  { uid:'oj', emoji:'🦑', name:'오징어',   laugh:'찌이익!' },
+  { uid:'mo', emoji:'🐙', name:'문어',     laugh:'찌이익찌익!' },
+  { uid:'go', emoji:'🐳', name:'고래',     laugh:'푸하앙' },
+  { uid:'pa', emoji:'🌊', name:'파도',     laugh:'까르르까르르' },
+];
+
+const creatureOptions = [
+  { id:'갈매기',    emoji:'🐦', name:'갈매기' },
+  { id:'조개',      emoji:'🐚', name:'조개' },
+  { id:'달랑게',    emoji:'🦀', name:'달랑게' },
+  { id:'불가사리',  emoji:'⭐', name:'불가사리' },
+  { id:'해마',      emoji:'🦭', name:'아기해마' },
+  { id:'오징어',    emoji:'🦑', name:'오징어' },
+  { id:'문어',      emoji:'🐙', name:'문어' },
+  { id:'고래',      emoji:'🐳', name:'고래' },
+  { id:'퐁퐁이',    emoji:'🐷', name:'퐁퐁이' },
+  { id:'두더지',    emoji:'🦔', name:'두더지' },
+  { id:'물고기',    emoji:'🐠', name:'물고기' },
+  { id:'거북이',    emoji:'🐢', name:'거북이' },
+  { id:'나만의생물',emoji:'🎨', name:'나만의생물' },
+];
+
+let userCreatures = [];
+let selected = null;
+let uploadedDataUrl = null;
+let states = {};
+let rafId = null;
+let allCreatures = [];
+
+const scene = document.getElementById('scene');
+const getW = () => scene.clientWidth || 640;
+const getH = () => scene.clientHeight || 400;
+
+function spawnState() {
+  const W = getW(); const H = getH();
+  const goRight = Math.random() < 0.5;
+  const speed = 0.4 + Math.random() * 0.45;
+  return {
+    x: goRight ? -130 : W + 20,
+    baseY: 30 + Math.random() * (H - 150),
+    y: 0,
+    vx: goRight ? speed : -speed,
+    bobAmp: 5 + Math.random() * 7,
+    bobFreq: 0.013 + Math.random() * 0.013,
+    bobOffset: Math.random() * Math.PI * 2,
+    frame: 0,
+  };
+}
+
+function makeEl(c) {
+  const wrap = document.createElement('div');
+  wrap.className = 'creature-wrap';
+  wrap.id = 'el-' + c.uid;
+  wrap.style.opacity = '0';
+
+  const bub = document.createElement('div');
+  bub.className = 'bubble';
+  bub.textContent = c.laugh;
+
+  let body;
+  if (c.imgSrc) {
+    body = document.createElement('img');
+    body.className = 'creature-img';
+    body.src = c.imgSrc;
+    body.alt = c.name;
+  } else {
+    body = document.createElement('div');
+    body.className = 'creature-emoji';
+    body.textContent = c.emoji;
+  }
+
+  const tag = document.createElement('div');
+  tag.className = 'name-tag';
+  tag.textContent = c.name;
+
+  wrap.appendChild(bub);
+  wrap.appendChild(body);
+  wrap.appendChild(tag);
+  scene.appendChild(wrap);
+  return wrap;
+}
+
+function removeAllEls() {
+  scene.querySelectorAll('.creature-wrap').forEach(e => e.remove());
+}
+
+function buildAll() {
+  allCreatures = [
+    ...defaultCreatures.map(c => ({ ...c })),
+    ...userCreatures.map(c => ({ ...c })),
+  ];
+}
+
+function renderAll() {
+  cancelAnimationFrame(rafId);
+  removeAllEls();
+  buildAll();
+  states = {};
+  const W = getW();
+  allCreatures.forEach((c, i) => {
+    makeEl(c);
+    const s = spawnState();
+    const offset = (i / allCreatures.length) * W * 1.2;
+    s.x = s.vx > 0 ? -130 + offset : W + 20 - offset;
+    s.y = s.baseY;
+    states[c.uid] = s;
+  });
+  animate();
+}
+
+function animate() {
+  const W = getW(); const H = getH();
+  const FADE = 70;
+
+  allCreatures.forEach(c => {
+    const s = states[c.uid];
+    const el = document.getElementById('el-' + c.uid);
+    if (!s || !el) return;
+
+    s.frame++;
+    s.x += s.vx;
+    s.y = Math.max(10, Math.min(H - 140, s.baseY + Math.sin(s.frame * s.bobFreq + s.bobOffset) * s.bobAmp));
+
+    const body = el.querySelector('.creature-emoji, .creature-img');
+    if (body) body.style.transform = s.vx < 0 ? 'scaleX(-1)' : 'scaleX(1)';
+
+    let opacity = 1;
+    if (s.vx > 0) {
+      if (s.x < FADE) opacity = s.x / FADE;
+      else if (s.x > W - FADE) opacity = (W - s.x) / FADE;
+    } else {
+      const rx = W - s.x - 100;
+      if (rx < FADE) opacity = rx / FADE;
+      else if (s.x < FADE) opacity = s.x / FADE;
+    }
+    el.style.opacity = Math.max(0, Math.min(1, opacity));
+    el.style.left = s.x + 'px';
+    el.style.top  = s.y + 'px';
+
+    if ((s.vx > 0 && s.x > W + 30) || (s.vx < 0 && s.x < -140)) {
+      const ns = spawnState();
+      ns.y = ns.baseY;
+      states[c.uid] = ns;
+    }
+  });
+
+  rafId = requestAnimationFrame(animate);
+}
+
+document.getElementById('upload-btn').onclick = () => document.getElementById('file-input').click();
+document.getElementById('file-input').onchange = (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    uploadedDataUrl = ev.target.result;
+    document.getElementById('preview-wrap').style.display = 'flex';
+    document.getElementById('preview-img').src = uploadedDataUrl;
+    document.getElementById('upload-label').textContent = '그림 준비 완료! ✅';
+    document.getElementById('status').textContent = '이름이랑 웃음소리를 입력하고 추가해봐요!';
+  };
+  reader.readAsDataURL(file);
+};
+
+function renderBtns() {
+  const container = document.getElementById('creature-btns');
+  container.innerHTML = '';
+  creatureOptions.forEach(c => {
+    const btn = document.createElement('button');
+    btn.className = 'cbtn' + (selected === c.id ? ' selected' : '');
+    btn.textContent = c.emoji + ' ' + c.name;
+    btn.onclick = () => {
+      selected = c.id;
+      renderBtns();
+      document.getElementById('status').textContent = c.name + ' 선택! 이름이랑 웃음소리를 입력해요 😄';
+    };
+    container.appendChild(btn);
+  });
+}
+
+document.getElementById('add-btn').onclick = () => {
+  const studentName = document.getElementById('name-input').value.trim();
+  const laugh = document.getElementById('laugh-input').value.trim();
+
+  if (!selected && !uploadedDataUrl) {
+    document.getElementById('status').textContent = '생물을 선택하거나 그림을 올려주세요!'; return;
+  }
+  if (!studentName) {
+    document.getElementById('status').textContent = '학생 이름을 입력해주세요!'; return;
+  }
+  if (!laugh) {
+    document.getElementById('status').textContent = '웃음소리를 입력해주세요!'; return;
+  }
+
+  const opt = selected ? creatureOptions.find(c => c.id === selected) : null;
+  const emoji = opt ? opt.emoji : '🎨';
+  const imgSrc = uploadedDataUrl || null;
+
+  const uid = 'u_' + Date.now();
+  userCreatures.push({ uid, name: studentName, emoji, laugh, imgSrc });
+  renderAll();
+
+  document.getElementById('name-input').value = '';
+  document.getElementById('laugh-input').value = '';
+  uploadedDataUrl = null;
+  document.getElementById('preview-wrap').style.display = 'none';
+  document.getElementById('preview-img').src = '';
+  document.getElementById('upload-label').textContent = '그림 사진을 올려주세요';
+  document.getElementById('file-input').value = '';
+  document.getElementById('status').textContent = studentName + ' 학생이 깔깔바다에 나타났어요! 🎉';
+  selected = null;
+  renderBtns();
+};
+
+document.getElementById('reset-btn').onclick = () => {
+  userCreatures = [];
+  renderAll();
+  document.getElementById('status').textContent = '추가한 생물을 모두 지웠어요.';
+};
+
+['name-input', 'laugh-input'].forEach(id => {
+  document.getElementById(id).addEventListener('keydown', e => {
+    if (e.key === 'Enter') document.getElementById('add-btn').click();
+  });
+});
+
+renderBtns();
+renderAll();
+</script>
